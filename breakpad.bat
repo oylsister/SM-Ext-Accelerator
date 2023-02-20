@@ -27,12 +27,12 @@ cmd /c depot_tools\gclient sync --nohooks
 @IF %errorlevel% neq 0 EXIT /b %errorlevel%
 :DONESRC
 
-cd src
-git config user.name patches
-git config user.email patches@localhost
-powershell -Command "& {git am -3 --keep-cr $(ls ..\..\patches\*.patch | %% {$_.FullName})}"
-@IF %errorlevel% neq 0 EXIT /b %errorlevel%
-cd ..
+@REM cd src
+@REM git config user.name patches
+@REM git config user.email patches@localhost
+@REM powershell -Command "& {git am -3 --keep-cr $(ls ..\..\patches\*.patch | %% {$_.FullName})}"
+@REM @IF %errorlevel% neq 0 EXIT /b %errorlevel%
+@REM cd ..
 
 @IF EXIST gyp\NUL GOTO HASGYP
 git clone --depth=1 --branch=master https://chromium.googlesource.com/external/gyp.git gyp
