@@ -382,7 +382,7 @@ public:
 class UploadThread: public IThread
 {
 	FILE *log = nullptr;
-	char serverId[38] = "";
+	char serverId[256] = "";
 
 	void RunThread(IThreadHandle *pHandle) {
 		rootconsole->ConsolePrint("Accelerator upload thread started.");
