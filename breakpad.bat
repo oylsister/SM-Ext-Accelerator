@@ -11,7 +11,7 @@ mkdir breakpad
 cd breakpad
 
 @IF EXIST depot_tools\NUL GOTO HASDEPOTTOOLS
-git clone --depth=1 --branch=master https://chromium.googlesource.com/chromium/tools/depot_tools.git depot_tools
+git clone --depth=1 --branch=main https://chromium.googlesource.com/chromium/tools/depot_tools.git depot_tools
 @IF %errorlevel% neq 0 EXIT /b %errorlevel%
 :HASDEPOTTOOLS
 
@@ -21,7 +21,7 @@ cmd /c depot_tools\fetch --nohooks breakpad
 GOTO DONESRC
 :HASSRC
 git -C src fetch
-git -C src reset --hard origin/master
+git -C src reset --hard origin/main
 @IF %errorlevel% neq 0 EXIT /b %errorlevel%
 cmd /c depot_tools\gclient sync --nohooks
 @IF %errorlevel% neq 0 EXIT /b %errorlevel%

@@ -8,14 +8,14 @@ fi
 cd breakpad
 
 if [ ! -d "depot_tools" ]; then
-  git clone --depth=1 --branch=master https://chromium.googlesource.com/chromium/tools/depot_tools.git depot_tools
+  git clone --depth=1 --branch=main https://chromium.googlesource.com/chromium/tools/depot_tools.git depot_tools
 fi
 
 if [ ! -d "src" ]; then
   PYTHONDONTWRITEBYTECODE=1 python2.7 ./depot_tools/fetch.py --nohooks breakpad
 else
   git -C src fetch
-  git -C src reset --hard origin/master
+  git -C src reset --hard origin/main
   PYTHONDONTWRITEBYTECODE=1 python2.7 ./depot_tools/gclient.py sync --nohooks
 fi
 
