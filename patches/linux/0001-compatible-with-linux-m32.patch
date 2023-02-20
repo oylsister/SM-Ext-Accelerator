@@ -1,0 +1,24 @@
+From 522cff88c4cb5c593f821fdb77f8fdf7a8c64c66 Mon Sep 17 00:00:00 2001
+From: patches <patches@localhost>
+Date: Mon, 20 Feb 2023 16:05:32 +0800
+Subject: [PATCH] compatible with linux m32
+
+---
+ src/common/stabs_reader.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/common/stabs_reader.h b/src/common/stabs_reader.h
+index 3f5f0a8f..68713503 100644
+--- a/src/common/stabs_reader.h
++++ b/src/common/stabs_reader.h
+@@ -56,7 +56,7 @@
+ #ifdef HAVE_MACH_O_NLIST_H
+ #include <mach-o/nlist.h>
+ #elif defined(HAVE_A_OUT_H)
+-#include <a.out.h>
++#include <linux/a.out.h>
+ #endif
+
+ #include <string>
+--
+2.25.1

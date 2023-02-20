@@ -19,11 +19,11 @@ else
   PYTHONDONTWRITEBYTECODE=1 python2.7 ./depot_tools/gclient.py sync --nohooks
 fi
 
-# cd src
-# git config user.name patches
-# git config user.email patches@localhost
-# git am -3 --keep-cr ../../patches/*.patch
-# cd ..
+cd src
+git config user.name patches
+git config user.email patches@localhost
+git am -3 --keep-cr ../../patches/linux/*.patch
+cd ..
 
 if [ ! -d "build" ]; then
   mkdir build
@@ -31,7 +31,7 @@ fi
 
 cd build
 
-../src/configure --enable-m32 CXXFLAGS="-g -O2"
+../src/configure --enable-m32 CXXFLAGS="-g -O2" ac_cv_header_a_out_h=yes
 
 make src/tools/linux/dump_syms/dump_syms
 make src/client/linux/libbreakpad_client.a
