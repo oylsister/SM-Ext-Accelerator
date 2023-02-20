@@ -60,10 +60,12 @@ public:
 	}
 };
 
-// Taken from https://hg.mozilla.org/mozilla-central/file/3eb7623b5e63b37823d5e9c562d56e586604c823/build/unix/stdc%2B%2Bcompat/stdc%2B%2Bcompat.cpp
-extern "C" void __attribute__((weak)) __cxa_throw_bad_array_new_length() {
-	abort();
-}
+// Taken from https://hg.mozilla.org/mozilla-central/file/tip/build/unix/stdc%2B%2Bcompat/stdc%2B%2Bcompat.cpp#l55
+namespace __cxxabiv1 {
+	extern "C" void __attribute__((weak)) __cxa_throw_bad_array_new_length() {
+		abort();
+	}
+} // namespace __cxxabiv1
 
 namespace std {
 	/* We shouldn't be throwing exceptions at all, but it sadly turns out
@@ -394,8 +396,9 @@ class UploadThread: public IThread
 		g_pSM->Format(path, sizeof(path), "%s/server-id.txt", dumpStoragePath);
 		FILE *serverIdFile = fopen(path, "r");
 		if (serverIdFile) {
-			fread(serverId, 1, sizeof(serverId) - 1, serverIdFile);
-			if (!feof(serverIdFile) || strlen(serverId) != 36) {
+			size_t read_size = fread(serverId, 1, sizeof(serverId) - 1, serverIdFile);
+			serverId[read_size] = '\0';
+			if (!feof(serverIdFile)) {
 				serverId[0] = '\0';
 			}
 			fclose(serverIdFile);
@@ -515,10 +518,17 @@ class UploadThread: public IThread
 				vdsoOutputPath = vdsoOutputPathBuffer;
 
 				while (!feof(auxvFile)) {
-					int auxvEntryId = 0;
-					fread(&auxvEntryId, sizeof(auxvEntryId), 1, auxvFile);
-					long auxvEntryValue = 0;
-					fread(&auxvEntryValue, sizeof(auxvEntryValue), 1, auxvFile);
+					size_t read_size;
+					int auxvEntryId;
+					read_size = fread(&auxvEntryId, sizeof(auxvEntryId), 1, auxvFile);
+					if (read_size != sizeof(auxvEntryId)) {
+						auxvEntryId = 0;
+					}
+					long auxvEntryValue;
+					read_size = fread(&auxvEntryValue, sizeof(auxvEntryValue), 1, auxvFile);
+					if (read_size != sizeof(auxvEntryValue)) {
+						auxvEntryValue = 0;
+					}
 
 					if (auxvEntryId == 0) break;
 					if (auxvEntryId != 33) continue; // AT_SYSINFO_EHDR
@@ -557,17 +567,17 @@ class UploadThread: public IThread
 		};
 
 		std::ostringstream outputStream;
-		google_breakpad::DumpOptions options(ALL_SYMBOL_DATA, true);
+		google_breakpad::DumpOptions options(ALL_SYMBOL_DATA, true, true);
 
 		{
 			StderrInhibitor stdrrInhibitor;
 
-			if (!WriteSymbolFile(debugFile, debug_dirs, options, outputStream)) {
+			if (!WriteSymbolFile(debugFile, debugFile, "Linux", debug_dirs, options, outputStream)) {
 				outputStream.str("");
 				outputStream.clear();
 
 				// Try again without debug dirs.
-				if (!WriteSymbolFile(debugFile, {}, options, outputStream)) {
+				if (!WriteSymbolFile(debugFile, debugFile, "Linux", {}, options, outputStream)) {
 					if (log) fprintf(log, "Failed to process symbol file\n");
 					return false;
 				}
@@ -1223,6 +1233,7 @@ bool Accelerator::SDK_OnLoad(char *error, size_t maxlength, bool late)
 		}
 
 		strncpy(crashSourceModVersion, spEngine2->GetVersionString(), sizeof(crashSourceModVersion));
+		crashSourceModVersion[sizeof(crashSourceModVersion) - 1] = '\0';
 	} while(false);
 
 	plsys->AddPluginsListener(this);
@@ -1244,8 +1255,9 @@ bool Accelerator::SDK_OnLoad(char *error, size_t maxlength, bool late)
 
 	FILE *steamInfFile = fopen(steamInfPath, "rb");
 	if (steamInfFile) {
-		char steamInfTemp[1024] = {0};
-		fread(steamInfTemp, sizeof(char), sizeof(steamInfTemp) - 1, steamInfFile);
+		char steamInfTemp[1024];
+		size_t read_size = fread(steamInfTemp, sizeof(char), sizeof(steamInfTemp) - 1, steamInfFile);
+		steamInfTemp[read_size] = '\0';
 
 		fclose(steamInfFile);
 

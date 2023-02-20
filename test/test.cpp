@@ -160,6 +160,7 @@ int main(int argc, char *argv[])
 	for (int i = (shouldDumpSymbols ? 2 : 1); i < argc; ++i) {
 		if (!generateCrash) {
 			strncpy(path, argv[i], sizeof(path));
+			path[sizeof(path) - 1] = '\0';
 		}
 
 		ProcessState processState;
@@ -247,10 +248,17 @@ int main(int argc, char *argv[])
 					free(workingDir);
 
 					while (!feof(auxvFile)) {
-						int auxvEntryId = 0;
-						fread(&auxvEntryId, sizeof(auxvEntryId), 1, auxvFile);
-						long auxvEntryValue = 0;
-						fread(&auxvEntryValue, sizeof(auxvEntryValue), 1, auxvFile);
+						size_t read_size;
+						int auxvEntryId;
+						read_size = fread(&auxvEntryId, sizeof(auxvEntryId), 1, auxvFile);
+						if (read_size != sizeof(auxvEntryId)) {
+							auxvEntryId = 0;
+						}
+						long auxvEntryValue;
+						read_size = fread(&auxvEntryValue, sizeof(auxvEntryValue), 1, auxvFile);
+						if (read_size != sizeof(auxvEntryValue)) {
+							auxvEntryValue = 0;
+						}
 
 						if (auxvEntryId == 0) break;
 						if (auxvEntryId != 33) continue; // AT_SYSINFO_EHDR
@@ -289,17 +297,17 @@ int main(int argc, char *argv[])
 			};
 
 			std::ostringstream outputStream;
-			google_breakpad::DumpOptions options(ALL_SYMBOL_DATA, true);
+			google_breakpad::DumpOptions options(ALL_SYMBOL_DATA, true, true);
 
 			{
 				StderrInhibitor stdrrInhibitor;
 
-				if (!WriteSymbolFile(debugFile, debug_dirs, options, outputStream)) {
+				if (!WriteSymbolFile(debugFile, debugFile, "Linux", debug_dirs, options, outputStream)) {
 					outputStream.str("");
 					outputStream.clear();
 
 					// Try again without debug dirs.
-					if (!WriteSymbolFile(debugFile, {}, options, outputStream)) {
+					if (!WriteSymbolFile(debugFile, debugFile, "Linux", {}, options, outputStream)) {
 						// TODO: Something.
 						continue;
 					}

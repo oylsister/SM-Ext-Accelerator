@@ -21,6 +21,7 @@ def BuildEverything():
 
 	if AMBuild.target['platform'] in ['linux']:
 		compiler['POSTLINKFLAGS'].append('-lm')
+		compiler['POSTLINKFLAGS'].append('-lz')
 		compiler['POSTLINKFLAGS'].append('-lstdc++')
 		compiler['POSTLINKFLAGS'].append('-pthread')
 
