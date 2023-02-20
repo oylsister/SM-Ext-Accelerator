@@ -23,6 +23,7 @@ cd src
 git config user.name patches
 git config user.email patches@localhost
 git am -3 --keep-cr ../../patches/linux/*.patch
+git am -3 --keep-cr ../../patches/*.patch
 cd ..
 
 if [ ! -d "build" ]; then
